@@ -1,6 +1,7 @@
 package frc.robot.commands;
 
 import static frc.robot.Constants.kMaxAngularRate;
+import static frc.robot.Constants.getDrivePowerScale;
 import static frc.robot.Constants.FieldConstants.kHubLocation;
 import static frc.robot.Constants.FieldConstants.kLeftTransportTarget;
 import static frc.robot.Constants.FieldConstants.kRightTransportTarget;
@@ -70,6 +71,7 @@ public class SwerveWithAim extends Command {
     public void execute() {
         Pose2d robotPose = drivetrain.getState().Pose;
         ChassisSpeeds fieldSpeeds = ChassisSpeeds.fromRobotRelativeSpeeds(drivetrain.getState().Speeds, robotPose.getRotation());
+        double powerScale = getDrivePowerScale();
 
         if (
             doAimSupplier.getAsBoolean()
@@ -94,7 +96,8 @@ public class SwerveWithAim extends Command {
                     || Math.abs(ySpeedSupplier.getAsDouble()) > 0
             ) {
                 drivetrain.setControl(
-                    driveAngle.withVelocityX(xSpeedSupplier.getAsDouble())
+                    driveAngle.withMaxAbsRotationalRate(kMaxAngularRate * powerScale)
+                        .withVelocityX(xSpeedSupplier.getAsDouble())
                         .withVelocityY(ySpeedSupplier.getAsDouble())
                         .withTargetDirection(compensatedAngle) // change to angle to disable heading compensation
                 );
@@ -119,8 +122,8 @@ public class SwerveWithAim extends Command {
 
             drivetrain.setControl(
                 drive.withVelocityX(xSpeedSupplier.getAsDouble())
-                    .withVelocityY(ySpeedSupplier.getAsDouble() + (AllianceFlipUtil.isRedAlliance() ? -yAdj : yAdj))
-                    .withRotationalRate(rotSpeedSupplier.getAsDouble() + zAdj)
+                    .withVelocityY(ySpeedSupplier.getAsDouble() + (AllianceFlipUtil.isRedAlliance() ? -yAdj : yAdj) * powerScale)
+                    .withRotationalRate(rotSpeedSupplier.getAsDouble() + zAdj * powerScale)
             );
         }
     }

@@ -6,12 +6,27 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.ctre.phoenix6.CANBus;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.generated.TunerConstants;
 
 public class Constants {
     public static final CANBus kCanivoreBus = new CANBus("GTX7130");
+
+    /**
+     * Swerve 底盤總輸出功率與速度縮放比例 (預設 0.5 = 50% 輸出功率，1.0 = 100% 全功率)
+     * 僅調整軟體控制輸出速度與功率，不修改馬達硬體電流/電壓限制，避免 CAN 斷訊問題。
+     */
+    public static final double kDrivePowerScale = 0.5;
+
+    /**
+     * 取得目前底盤輸出功率縮放比例（支援從 SmartDashboard "DrivePowerScale" 即時微調）
+     */
+    public static double getDrivePowerScale() {
+        return MathUtil.clamp(SmartDashboard.getNumber("DrivePowerScale", kDrivePowerScale), 0.1, 1.0);
+    }
 
     public static final double kMaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
     public static final double kMaxAngularRate = RotationsPerSecond.of(1.0).in(RadiansPerSecond);
